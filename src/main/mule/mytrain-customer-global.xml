@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="mytrain-customer-globalError_Handler" doc:id="37c1da3b-2104-49bb-9b8e-8d061143bfd4" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b2afcf0d-ff06-4db6-a7b2-c8499bbecd4b" type="DB:BAD_SQL_SYNTAX">
+			<set-variable value="" doc:name="Set httpStatus" doc:id="10a0d414-d276-484f-a4ed-94ca7460201e" variableName="httpStatus"/>
+			<flow-ref doc:name="Flow Reference" doc:id="b4c2258c-b5c5-484c-a222-979b008a0ca0" name="mytrain-customer-globalFlow"/>
+		</on-error-propagate>
+	</error-handler>
+	<flow name="mytrain-customer-globalFlow" doc:id="5c5700bd-3c48-4413-929d-3630ccf3b33a" >
+		<ee:transform doc:name="Transform Message" doc:id="be3c068c-49cf-4ab6-9bfc-7f4d1901d006" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	code: vars.httpStatus,
+	message: error.errorType.identifier,
+	description: error.description,
+	dateTime: now() as String 
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="91b2b753-0e4e-4257-add5-d982c2057f9a" config-ref="JSON_Logger_Config" message="global error response of usersysapi"/>
+	</flow>
+</mule>

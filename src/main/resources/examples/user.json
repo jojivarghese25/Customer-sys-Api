@@ -1,0 +1,9 @@
+ [{
+    "userId": "1",
+    "emailId": "jojihr@gmail.com",
+    "status_type_id":"active",
+    "firstName": "joji",
+    "lastName": "varghese",
+    "phoneNumber": "2234455",
+    "created_timestamp":"2018-02-04 14:08:25",
+    "updated_timestamp": "2018-03-02 12:08:25"}]

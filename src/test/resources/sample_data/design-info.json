@@ -1,0 +1,13 @@
+{
+  "sampleData": {
+    "a245e58f-fffa-4ca5-b6c0-eb19da37be78": {
+      "payload": "sample_data/list_object.dwl"
+    },
+    "35bbf039-1e38-4746-b46a-5107156b1556": {
+      "payload": "sample_data/list_object_1.dwl"
+    },
+    "591b81cd-48b3-4e4d-a441-f0e7f2734e81": {
+      "payload": "sample_data/list_json.json"
+    }
+  }
+}

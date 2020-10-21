@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mytrain-customer-sys-implementation-test-suite.xml" />
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-customer-register-flowTest" doc:id="aa643725-7c07-4a34-a30e-cf974e2b9a17" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="6c2ee09b-f8bc-482b-8856-4dbdb460e020" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="inserting customer details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[{
+	"userId": "A123678",
+	"emailId": "shaeo@gmail.com",
+	"firstName": "shae",
+	"lastName": "moll",
+	"phoneNumber": "900090009"
+		}]
+' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="df2ea470-be15-4157-a398-8dd2305822ba" >
+				<munit:payload value='#[{
+	"userId": "A123678",
+	"emailId": "shaeo@gmail.com",
+	"firstName": "shae",
+	"lastName": "moll",
+	"phoneNumber": "900090009"
+		}]
+' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to customer-register-flow" doc:id="2d98df51-5853-45d3-a0c3-980f5b51bc5f" name="customer-register-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="b00874a7-1c8d-45b6-88a2-b66663f9dcfb" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-customerid-flowTest" doc:id="93b17e52-d39c-4850-8999-a80321896fd7" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="5d2581e5-56be-403b-90cc-eaf71ebbdd2a" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Userdatabase" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="8fca8654-a989-4668-b69d-309dc816d17f" >
+				<munit:payload value='#[{
+    "userId": "A1225346ff",
+    "emailId": "joann@yahoo.com",
+    "statustypeid": "114",
+    "firstName": "joanne",
+    "lastName": "jacob",
+    "phoneNumber": "5568908"
+    
+}]' />
+				<munit:attributes value="#[(uriParams:(userid:'A1225346ff'))]" />
+				<munit:variables >
+					<munit:variable key="userid" value="A1225346ff" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to customerid-flow" doc:id="90b87d13-49c3-4574-88f1-1f82056b07e1" name="customerid-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="3b8ae436-dbad-48fa-8685-e3bd386344cb" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-customerid-modify-flowTest" doc:id="a21ae049-aa34-4c8f-a5e9-0d7ab95dfac2" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="0af3e158-20ce-42d6-9ca8-b3e117e3002f" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="updateuser" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="a9f7aa39-06c2-4c39-b187-99edc5e52fdc" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['succesfully update']" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d00c5e62-f1aa-45fb-87f8-ca9bf2e02648" >
+				<munit:payload value='{
+    "userId": "A1225346ff",
+    "emailId": "joann@yahoo.com",
+    "statustypeid": "114",
+    "firstName": "joanne",
+    "lastName": "jacob",
+    "phoneNumber": "5568908"
+    
+}' encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[(uriParams:(userid:'A1225346ff'))]" />
+				<munit:variables >
+					<munit:variable key="userid" value="A1225346ff" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to customerid-modify-flow" doc:id="cd06ec9e-3762-4f8c-a625-5d2739839c18" name="customerid-modify-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="f6403e4e-f253-46bf-bd1a-2eaed6da411d" actual='#[payload]' expected='#[message:"successfully updated"]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-Customer-delete-flowTest" doc:id="49283e66-c8ba-4a43-b961-5fce1d8ea3e0" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="850d5d96-2de4-40a1-b30d-054039d6f1ff" processor="db:delete">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Delete user" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d7addf08-081b-4a33-aa7a-d631eb94a131" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				
+				<munit-tools:then-return >
+					<munit-tools:payload value='#["deleted successfully"]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="0497dfb7-3b0a-4f10-87d6-d7e7b2867be5" >
+				<munit:attributes value="#[(uriParams:(userid:'A1225346ff'))]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to Customer-delete-flow" doc:id="5bc924cc-2b98-423c-a2ff-a0a7949278d6" name="Customer-delete-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="fe1a138d-27e2-4b5f-a4f0-0f5b4d4cc83e" actual="#[payload]" expected='#[{
+	message:"deleted successfully"
+}]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-subscribe-user-flowTest" doc:id="682cf448-d583-453b-b960-8f7a640e6362" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="0e4c4c62-29a1-48f0-b2f6-7353ef7583c7" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bc7a2c76-7b55-4165-9073-f84547a26b0c" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('subscribe-input.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ee17e7c4-5128-4ff9-adef-037dd1c2feb9" >
+				<munit:payload value='{ "userId": "1",
+  "source_location": "Bath",
+  "destination_location": "london",
+  "from_time": "10:30:00",
+  "to_time": "11:00:00",
+  "Advance_notify_time_min": "30:00:00",
+  
+  "statustypeID": "1"
+}' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to subscribe-user-flow" doc:id="3b87caec-305a-483d-9f00-def2187f9ed5" name="subscribe-user-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7b9917a8-718a-4cec-b0ee-260dde9e241c" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-usersubcription-add-flowTest" doc:id="a3b0a6a5-41f8-4da6-bdf3-e6bb2ef15a38" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d6ec8f46-22d4-489b-8ed7-66880ca678aa" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Insert" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[{ "userId": "1",
+  "source_location": "Bath",
+  "destination_location": "london",
+  "from_time": "10:30:00",
+  "to_time": "11:00:00",
+  "Advance_notify_time_min": "30:00:00",
+  
+  "statustypeID": "1"
+}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="7f24966e-e018-4bd1-b18c-2247951b3ec4" >
+				<munit:payload value='#[{ "userId": "1",
+  "source_location": "Bath",
+  "destination_location": "london",
+  "from_time": "10:30:00",
+  "to_time": "11:00:00",
+  "Advance_notify_time_min": "30:00:00",
+  
+  "statustypeID": "1"
+}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to usersubcription-add-flow" doc:id="a247d74b-117d-4c35-b05c-691f550b24ab" name="usersubcription-add-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="2348ec7f-26ae-4f0f-a1ca-c4fe6f614845" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-usersubscription-modify-flowTest" doc:id="0833ae3e-3ffa-47bb-82a8-ea0e2f1ad0a1" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="da99927a-49ae-421b-878f-69f9acce69b1" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Update" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[message:"Successfully updated"]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="158be135-74d1-4fc6-a04d-09af49fcbef8" >
+				<munit:payload value='{ "userId": "1",
+  "source_location": "Bath",
+  "destination_location": "london",
+  "from_time": "10:30:00",
+  "to_time": "11:00:00",
+  "Advance_notify_time_min": "30:00:00",
+  
+  "statustypeID": "1"
+}' mediaType="application/json" />
+				<munit:attributes value="#[(uriParams:(subcriptionid:'A1225346ff'))]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to usersubscription-modify-flow" doc:id="8e22272e-af3f-4735-b184-d031c3fa6495" name="usersubscription-modify-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="0abc7866-b9df-4024-9590-23bc714de2d7" actual="#[payload]" expected='#[message:"Successfully updated"]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mytrain-customer-sys-implementation-test-suite-customer-retrival-flowTest" doc:id="715a9589-0473-4c38-bad5-b301607e7ad7" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ecc72eda-2e5b-4406-8a52-bcbfdf1450b9" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Userdatabase" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f5fd6903-d3ec-49e0-b133-46194fe2b88e" >
+				<munit:payload value="[{
+    &quot;userId&quot;: &quot;A1225346ff'&quot;,
+    &quot;emailId&quot;: &quot;mail@gmail.com&quot;,
+    &quot;status_type_id&quot;:1,
+    &quot;firstName&quot;: &quot;mary&quot;,
+    &quot;lastName&quot;: &quot;varghese&quot;,
+    &quot;phoneNumber&quot;: &quot;223445589&quot;,
+    &quot;created_timestamp&quot;:&quot;2018-02-04 14:08:25&quot;,
+    &quot;updated_timestamp&quot;: &quot;2018-03-02 12:08:25&quot;},
+     {&quot;userId&quot;: &quot;A1225346m'&quot;,
+    &quot;emailId&quot;: &quot;mails@gmail.com&quot;,
+    &quot;status_type_id&quot;:2,
+    &quot;firstName&quot;: &quot;maryin&quot;,
+    &quot;lastName&quot;: &quot;varghese&quot;,
+    &quot;phoneNumber&quot;: &quot;2234455891&quot;,
+    &quot;created_timestamp&quot;:&quot;2018-02-04 14:08:25&quot;,
+    &quot;updated_timestamp&quot;: &quot;2018-03-02 12:08:25&quot;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to customer-retrival-flow" doc:id="533f5ad8-fb7d-4bd2-80d4-6becc3cb1535" name="customer-retrival-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="575967d8-39d6-482b-80d1-9fd07d51e8ea" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="1a18e484-b17d-4d03-8fbf-cc01d1b3d9c3" applicationName="customer-sys-api" applicationVersion="1.0.0-SNAPSHOT" environment="dev" />
+	<flow name="customer-retrival-flow" doc:id="570b1ca6-6dff-48ea-9d6e-7ed1a7da5e52" >
+		<db:select doc:name="Userdatabase" doc:id="554d370e-7e94-495e-9d66-8376ffcaa4ae" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * from user]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Usertransformation" doc:id="a245e58f-fffa-4ca5-b6c0-eb19da37be78" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	userId: payload01.USER_ID,
+	emailId: payload01.EMAIL_ID,
+	status_type_id: payload01.STATUS_TYPE_ID as String,
+	firstName: payload01.FIRST_NAME,
+	lastName: payload01.LAST_NAME,
+	phoneNumber: payload01.PHONE_NUMBER,
+	created_timestamp: payload01.CREATED_TIMESTAMP as String default "",
+	updated_timestamp: payload01.UPDATED_TIMESTAMP as String default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="d07c25a9-a687-4399-83e3-4adead7db18b" config-ref="JSON_Logger_Config" message="getting all registered users"/>
+	</flow>
+	<flow name="customer-register-flow" doc:id="1b84b8ea-2181-4b5d-bd03-4cc07b024ea6" >
+		<json-logger:logger doc:name="Logger" doc:id="5a751846-67c0-43c2-a746-f43c88a52c5a" config-ref="JSON_Logger_Config" message="payload entered"/>
+		<db:insert doc:name="inserting customer details" doc:id="022c4f76-3091-488a-9154-17c9cc3d3abd" config-ref="Database_Config">
+			<error-mapping sourceType="DB:QUERY_EXECUTION" targetType="USER:USER_DUPLICATE" />
+			<db:sql ><![CDATA[INSERT INTO user (USER_ID, EMAIL_ID, FIRST_NAME, LAST_NAME, PHONE_NUMBER)
+ 
+VALUES (:userId, :emailId, :firstName, :lastName, :phoneNo );
+
+
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"userId": payload.userId,
+	"emailId": payload.emailId,
+	
+	"firstName": payload.firstName,
+	"lastName": payload.lastName,
+	"phoneNo": payload.phoneNumber,
+	
+	}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="751f1ab0-6275-4da8-b7cc-f495556c1e7b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"Data inserted successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="85c0dc63-f50d-4be7-aae1-33c19b7e77d7" config-ref="JSON_Logger_Config" message="Data inserted successfully"/>
+	</flow>
+	<flow name="customerid-flow" doc:id="08fff5e8-c98e-43a6-a823-86130bf2cadf" >
+		<set-variable value="#[message.attributes.uriParams.id]" doc:name="UserID" doc:id="ca4dd905-99eb-4012-99ea-21b21d3a8399" variableName="userid" />
+		<db:select doc:name="Userdatabase" doc:id="224b1898-5034-4bfe-a569-e60615e3a759" config-ref="Database_Config" >
+			<db:sql ><![CDATA[SELECT * from user WHERE user_id=:user_id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"user_id": message.attributes.uriParams.id}]]]></db:input-parameters>
+		</db:select>
+		<json-logger:logger doc:name="Logger" doc:id="1bbb78ae-eaf8-47d0-9935-7d04582b9ef2" config-ref="JSON_Logger_Config" message="user id passed"/>
+		<ee:transform doc:name="IDtransformation" doc:id="35bbf039-1e38-4746-b46a-5107156b1556">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	userId: payload01.USER_ID,
+	emailId: payload01.EMAIL_ID,
+	status_type_id: payload01.STATUS_TYPE_ID as String default null,
+	firstName: payload01.FIRST_NAME,
+	lastName: payload01.LAST_NAME,
+	phoneNumber: payload01.PHONE_NUMBER,
+	created_timestamp: payload01.CREATED_TIMESTAMP as String default "",
+	updated_timestamp: payload01.UPDATED_TIMESTAMP as String default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="591b81cd-48b3-4e4d-a441-f0e7f2734e81" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0  
+output application/json  
+---  
+payload reduce ((item, accumulator) -> accumulator)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="2a19966a-95ae-4746-8ed9-621fe07abfb5" config-ref="JSON_Logger_Config" message="id details displayed"/>
+	</flow>
+	<flow name="customerid-modify-flow" doc:id="f9e2e0be-4fbc-4a25-b910-ba7996df0717" >
+		<json-logger:logger doc:name="Logger" doc:id="ba4acf38-6e2e-49e4-8d94-66ca5c46610b" config-ref="JSON_Logger_Config" message="to modify user details"/>
+		<ee:transform doc:name="Transform Message" doc:id="94338f34-c437-42b9-be58-c08d37dcfae6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[message.payload.userId]" doc:name="Set Variable" doc:id="9bf53821-eae5-4e43-bfaf-f98526a2f95d" variableName="userid"/>
+		<db:update doc:name="updateuser" doc:id="a9f7aa39-06c2-4c39-b187-99edc5e52fdc" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE `train`.`user`
+SET
+`USER_ID` = :userid,
+`EMAIL_ID` = :emailid,
+`FIRST_NAME` = :firstname,
+`LAST_NAME` = :lastname,
+`PHONE_NUMBER` = :phonenumber
+where user_id =:userid;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+"userid": payload.userId,
+"emailid": payload.emailId,
+"firstname": payload.firstName,
+"lastname": payload.lastName,
+"phonenumber": payload.phoneNumber
+}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="14fd7abe-1fac-4df1-a061-ec1efd490a00" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+message:"successfully updated"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="25c36349-0c17-45c0-a94d-27fc4c05b078" config-ref="JSON_Logger_Config" message="successfully updated"/>
+	</flow>
+	<flow name="Customer-delete-flow" doc:id="f440e8ec-8085-4629-b789-d2eabe7dffc2" >
+		<db:delete doc:name="Delete user" doc:id="d7addf08-081b-4a33-aa7a-d631eb94a131" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM user where user_id=:user_id;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"user_id": message.attributes.uriParams.id
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="636b129a-ad22-4453-9007-df6b799b60be" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"deleted successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="988edab9-dc3b-486d-ada9-cb3dee2f5c3d" config-ref="JSON_Logger_Config" message="delete user successfully"/>
+	</flow>
+	<flow name="subscribe-user-flow" doc:id="1da1c5ce-d666-4feb-878e-809a170dda4e" >
+		<db:select doc:name="Select" doc:id="bc7a2c76-7b55-4165-9073-f84547a26b0c" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * from train.subscription where (current_time()+advance_notify_time_min) between from_time and to_time and subscription.status_type_id=1;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="44a4f170-46cc-4c1a-9103-837d1f0dc816" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="e78d3360-d091-4e6f-ab00-7daf22a93351" config-ref="JSON_Logger_Config" message="subscribed users"/>
+	</flow>
+	<flow name="usersubcription-add-flow" doc:id="d5d1995d-6010-4886-bd3e-9dfbee499970">
+		<json-logger:logger doc:name="Logger" doc:id="cc03e3dd-ecb5-4595-adef-c6777e2ab178" config-ref="JSON_Logger_Config" message="adding user subscription"/>
+		<db:insert doc:name="Insert" doc:id="ecc2568e-f26e-465d-81d9-927a359c159c" config-ref="Database_Config">
+			<db:sql><![CDATA[INSERT INTO subscription (USER_ID,STATUS_TYPE_ID,SOURCE_LOCATION,DESTINATION_LOCATION,FROM_TIME,TO_TIME,ADVANCE_NOTIFY_TIME_MIN) VALUES (:USER_ID,STATUS_TYPE_ID,:SOURCE_LOCATION,:DESTINATION_LOCATION,:FROM_TIME,:TO_TIME,:ADVANCE_NOTIFY_TIME_MIN)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"USER_ID": payload.userId,
+	"STATUS_TYPE_ID": '1',
+	"SOURCE_LOCATION": payload.source_location,
+	"DESTINATION_LOCATION": payload.destination_location,
+	"FROM_TIME": payload.from_time,
+	"TO_TIME": payload.to_time,
+	"ADVANCE_NOTIFY_TIME_MIN": payload.Advance_notify_time_min
+		}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="8eb1cfbd-1d07-4022-aa83-d64105b8281c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	userId: payload.userId,
+	status_id_type: '1',
+	source_location: payload.source_location,
+	destination_location: payload.destination_location,
+	from_time: payload.from_time,
+	to_time: payload.to_time,
+	
+	Advance_notify_time_min: payload.Advance_notify_time_min
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="176b910e-bae5-4f60-80da-50f64867b450" config-ref="JSON_Logger_Config" message="Added the subscription"/>
+	</flow>
+	<flow name="usersubscription-modify-flow" doc:id="e66adc7a-b20a-49e9-b8fc-7309159cf934" >
+		<set-variable value="#[message.uriParams.subcriptionid]" doc:name="Set Variable" doc:id="455ee6ef-5319-4959-a4dd-cd86b289bb4f" variableName="subcriptionid"/>
+		<json-logger:logger doc:name="Logger" doc:id="96e61194-1ea4-4697-9bc2-8f6b72536ebb" config-ref="JSON_Logger_Config" message="modifying the subscription"/>
+		<db:update doc:name="Update" doc:id="a99621b0-91f6-4b44-91a8-f3775949fa51" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE subscription SET(SOURCE_LOCATION=:SOURCE_LOCATION,DESTINATION_LOCATION=:DESTINATION_LOCATION,FROM_TIME=:FROM_TIME,TO_TIME=:TO_TIME,ADVANCE_NOTIFY_TIME_MIN=:ADVANCE_NOTIFY_TIME_MIN)
+where subcriptionid =:subcriptionid;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"USER_ID": payload.userId,
+	"SOURCE_LOCATION": payload.source_location,
+	"DESTINATION_LOCATION": payload.destination_location,
+	"FROM_TIME": payload.from_time,
+	"TO_TIME": payload.to_time,
+	"ADVANCE_NOTIFY_TIME_MIN": payload.Advance_notify_time_min
+		}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="b11f395b-04e8-4b5b-ad03-f444509a1c7a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"Successfully updated"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="d3041f81-9350-43cd-9ecb-5334497d7189" config-ref="JSON_Logger_Config" message="succesfully updated"/>
+	</flow>
+</mule>

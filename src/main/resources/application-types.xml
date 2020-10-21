@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="user_json" format="json">
+      <types:shape format="weave" example="examples/user.json"><![CDATA[%dw 2.0
+
+type user_json = Array<{|  userId: String,   emailId: String,   status_type_id: String,   firstName: String,   lastName: String,   phoneNumber: String,   created_timestamp: String,   updated_timestamp: String|}> {"example": "[{\\\"userId\\\":\\\"1\\\",\\\"emailId\\\":\\\"jojihr@gmail.com\\\",\\\"status_type_id\\\":\\\"active\\\",\\\"firstName\\\":\\\"joji\\\",\\\"lastName\\\":\\\"varghese\\\",\\\"phoneNumber\\\":\\\"2234455\\\",\\\"created_timestamp\\\":\\\"2018-02-04 14:08:25\\\",\\\"updated_timestamp\\\":\\\"2018-03-02 12:08:25\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="oktaou_json" format="json">
+      <types:shape format="weave" example="oktaoutput.json"><![CDATA[%dw 2.0
+
+type oktaou_json = {|
+  firstName: String, 
+  lastName: String, 
+  phoneNumber: String, 
+  emailId: String, 
+  userId: String
+|} {"example": "{\\\"firstName\\\":\\\"pow\\\",\\\"lastName\\\":\\\"tom\\\",\\\"phoneNumber\\\":\\\"55770101611\\\",\\\"emailId\\\":\\\"p123@gmail.com\\\",\\\"userId\\\":\\\"00uoon9kkWv5izltB4x6\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="sub_input_json" format="json">
+      <types:shape format="weave" example="subscribe-input.json"><![CDATA[%dw 2.0
+
+type sub_input_json = {|
+  userId: String, 
+  source_location: String, 
+  destination_location: String, 
+  from_time: String, 
+  to_time: String, 
+  Advance_notify_time_min: String
+|} {"example": "{\\\"userId\\\":\\\"122345asd\\\",\\\"source_location\\\":\\\"Bath\\\",\\\"destination_location\\\":\\\"london\\\",\\\"from_time\\\":\\\"10:30:00\\\",\\\"to_time\\\":\\\"11:00:00\\\",\\\"Advance_notify_time_min\\\":\\\"30:00:00\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a245e58f-fffa-4ca5-b6c0-eb19da37be78">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="user_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#94338f34-c437-42b9-be58-c08d37dcfae6">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="user_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#022c4f76-3091-488a-9154-17c9cc3d3abd">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="oktaou_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#8eb1cfbd-1d07-4022-aa83-d64105b8281c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="sub_input_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="sub_input_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

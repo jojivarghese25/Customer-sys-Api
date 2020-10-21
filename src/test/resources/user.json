@@ -1,0 +1,17 @@
+ [{
+    "userId": "A1225346ff'",
+    "emailId": "mail@gmail.com",
+    "status_type_id":1,
+    "firstName": "mary",
+    "lastName": "varghese",
+    "phoneNumber": "223445589",
+    "created_timestamp":"2018-02-04 14:08:25",
+    "updated_timestamp": "2018-03-02 12:08:25"},
+     {"userId": "A1225346m'",
+    "emailId": "mails@gmail.com",
+    "status_type_id":2,
+    "firstName": "maryin",
+    "lastName": "varghese",
+    "phoneNumber": "2234455891",
+    "created_timestamp":"2018-02-04 14:08:25",
+    "updated_timestamp": "2018-03-02 12:08:25"}]
